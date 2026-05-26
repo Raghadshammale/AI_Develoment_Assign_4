@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>محوّل العملات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --card: #21262d;
+      --border: #30363d;
+      --accent: #f0b429;
+      --accent2: #e07b00;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --success: #3fb950;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(240,180,41,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(63,185,80,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .coin-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 8px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), #fff8e7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover { border-color: rgba(240,180,41,0.35); }
+
+    .field-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-label span { font-size: 1rem; }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="number"],
+    select {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Cairo', sans-serif;
+      font-size: 1rem;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(240,180,41,0.12);
+    }
+
+    input[type="number"] { flex: 1.4; }
+    select.currency-select { flex: 1; }
+
+    select option { background: var(--card); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 6px 0;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-icon {
+      color: var(--accent);
+      font-size: 1.3rem;
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .op-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .op-btn {
+      flex: 1;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .op-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(240,180,41,0.06);
+    }
+
+    .op-btn.active {
+      border-color: var(--accent);
+      background: rgba(240,180,41,0.12);
+      color: var(--accent);
+    }
+
+    .calculate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: var(--radius);
+      color: #1a1000;
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 900;
+      padding: 16px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .calculate-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.2s;
+    }
+
+    .calculate-btn:hover::after { background: rgba(255,255,255,0.1); }
+    .calculate-btn:active { transform: scale(0.98); }
+
+    .result-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      text-align: center;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s;
+    }
+
+    .result-card.has-result {
+      border-color: var(--success);
+      box-shadow: 0 0 20px rgba(63,185,80,0.1);
+    }
+
+    .result-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--success);
+      direction: ltr;
+      line-height: 1.1;
+    }
+
+    .result-detail {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .placeholder {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .error-msg {
+      color: #f85149;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .rates-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 12px;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 480px) {
+      .input-row { flex-direction: column; }
+      header h1 { font-size: 1.6rem; }
+      .result-value { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <span class="coin-icon">💱</span>
+    <h1>محوّل العملات</h1>
+    <p>تحويل وحساب بين العملات الرئيسية</p>
+  </header>
+
+  <!-- المبلغ والعملة الأصلية -->
+  <div class="card">
+    <div class="field-label"><span>💵</span> المبلغ والعملة الأصلية</div>
+    <div class="input-row">
+      <input type="number" id="amount" placeholder="أدخل المبلغ" min="0" step="any"/>
+      <select id="fromCurrency" class="currency-select">
+        <option value="ILS">🇮🇱 شيكل</option>
+        <option value="USD" selected>🇺🇸 دولار</option>
+        <option value="JOD">🇯🇴 دينار</option>
+        <option value="EGP">🇪🇬 جنيه مصري</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-icon">⟳</span></div>
+
+  <!-- العملة المستهدفة -->
+  <div class="card">
+    <div class="field-label"><span>🎯</span> العملة المستهدفة</div>
+    <select id="toCurrency">
+      <option value="ILS" selected>🇮🇱 شيكل</option>
+      <option value="USD">🇺🇸 دولار</option>
+      <option value="JOD">🇯🇴 دينار</option>
+      <option value="EGP">🇪🇬 جنيه مصري</option>
+    </select>
+  </div>
+
+  <!-- العملية الحسابية -->
+  <div class="card">
+    <div class="field-label"><span>🔢</span> العملية الحسابية بعد التحويل</div>
+    <div class="op-group">
+      <button class="op-btn active" id="btnMul" onclick="selectOp('mul')">
+        × ضرب
+      </button>
+      <button class="op-btn" id="btnDiv" onclick="selectOp('div')">
+        ÷ قسمة
+      </button>
+    </div>
+    <div style="margin-top:12px;">
+      <input type="number" id="operand" placeholder="أدخل الرقم للضرب أو القسمة عليه" min="0" step="any"/>
+    </div>
+  </div>
+
+  <!-- زر الحساب -->
+  <button class="calculate-btn" onclick="calculate()">احسب النتيجة ✦</button>
+
+  <!-- النتيجة -->
+  <div class="result-card" id="resultCard" style="margin-top:16px;">
+    <div class="placeholder">ستظهر النتيجة هنا</div>
+  </div>
+
+  <p class="rates-note">⚡ أسعار الصرف تقريبية وقد تختلف عن الأسعار الفعلية</p>
+</div>
+
+<script>
+  // أسعار صرف تقريبية بالنسبة للدولار الأمريكي
+  const rates = {
+    USD: 1,
+    ILS: 3.70,
+    JOD: 0.709,
+    EGP: 48.5
+  };
+
+  const symbols = { USD: '$', ILS: '₪', JOD: 'JD', EGP: 'E£' };
+  const names = { USD: 'دولار', ILS: 'شيكل', JOD: 'دينار', EGP: 'جنيه مصري' };
+
+  let selectedOp = 'mul';
+
+  function selectOp(op) {
+    selectedOp = op;
+    document.getElementById('btnMul').classList.toggle('active', op === 'mul');
+    document.getElementById('btnDiv').classList.toggle('active', op === 'div');
+  }
+
+  function convert(amount, from, to) {
+    const inUSD = amount / rates[from];
+    return inUSD * rates[to];
+  }
+
+  function calculate() {
+    const amount = parseFloat(document.getElementById('amount').value);
+    const from = document.getElementById('fromCurrency').value;
+    const to = document.getElementById('toCurrency').value;
+    const operand = parseFloat(document.getElementById('operand').value);
+    const card = document.getElementById('resultCard');
+
+    // التحقق من المدخلات
+    if (isNaN(amount) || amount <= 0) {
+      showError('الرجاء إدخال مبلغ صحيح أكبر من الصفر');
+      return;
+    }
+    if (isNaN(operand) || operand <= 0) {
+      showError('الرجاء إدخال رقم صحيح للعملية الحسابية');
+      return;
+    }
+    if (selectedOp === 'div' && operand === 0) {
+      showError('لا يمكن القسمة على صفر');
+      return;
+    }
+
+    // التحويل أولاً
+    const converted = convert(amount, from, to);
+
+    // ثم تطبيق العملية الحسابية
+    let finalResult;
+    let opSymbol;
+    if (selectedOp === 'mul') {
+      finalResult = converted * operand;
+      opSymbol = '×';
+    } else {
+      finalResult = converted / operand;
+      opSymbol = '÷';
+    }
+
+    // عرض النتيجة
+    card.classList.add('has-result');
+    card.innerHTML = `
+      <div class="result-label">النتيجة النهائية</div>
+      <div class="result-value">${symbols[to]}${finalResult.toLocaleString('ar-SA', {minimumFractionDigits: 2, maximumFractionDigits: 4})}</div>
+      <div class="result-detail">
+        ${amount.toLocaleString('ar-SA')} ${names[from]}
+        → ${converted.toFixed(4)} ${names[to]}
+        ${opSymbol} ${operand}
+        = <strong>${finalResult.toFixed(4)} ${names[to]}</strong>
+      </div>
+    `;
+
+    // تأثير بصري
+    card.style.transform = 'scale(0.97)';
+    setTimeout(() => card.style.transform = 'scale(1)', 150);
+  }
+
+  function showError(msg) {
+    const card = document.getElementById('resultCard');
+    card.classList.remove('has-result');
+    card.innerHTML = `<div class="error-msg">⚠️ ${msg}</div>`;
+  }
+</script>
+</body>
+</html>
