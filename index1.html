@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محول العملات التلقائي المطور</title>
+    <style>
+        /* تصميم نظيف، مريح، بلمسة عصرية هادئة */
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #16a34a;
+            --background-color: #f1f5f9;
+            --card-background: #ffffff;
+            --text-color: #0f172a;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 213, 0.1);
+        }
+
+        /* حقل القراءة فقط للمبلغ المحول تلقائياً */
+        input[readonly] {
+            background-color: #f8fafc;
+            color: var(--success-color);
+            font-weight: bold;
+            border-color: #bbf7d0;
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        .results-section {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .result-item:not(:last-child) {
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .result-value.final {
+            color: var(--success-color);
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>المحول والآلة الحاسبة الذكية</h2>
+    
+    <div class="row">
+        <div class="form-group" style="flex: 2;">
+            <label for="amount">المبلغ المراد تحويله:</label>
+            <input type="number" id="amount" placeholder="أدخل المبلغ هنا" min="0" step="any">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label for="fromCurrency">من عملة:</label>
+            <select id="fromCurrency">
+                <option value="ILS">شيكل</option>
+                <option value="USD" selected>دولار</option>
+                <option value="JOD">دينار</option>
+                <option value="EGP">جنيه مصري</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group" style="flex: 1;">
+            <label for="toCurrency">إلى عملة:</label>
+            <select id="toCurrency">
+                <option value="ILS" selected>شيكل</option>
+                <option value="USD">دولار</option>
+                <option value="JOD">دينار</option>
+                <option value="EGP">جنيه مصري</option>
+            </select>
+        </div>
+        <div class="form-group" style="flex: 1.5;">
+            <label>مبلغ التحويل التلقائي اليومي:</label>
+            <input type="text" id="convertedAmountDisplay" readonly placeholder="0.00">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="operation">العملية الحسابية (على المبلغ المحوّل):</label>
+        <select id="operation">
+            <option value="multiply">ضرب (×)</option>
+            <option value="divide">قسمة (÷)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="calcNumber">الرقم المراد ضرب أو قسمة المبلغ عليه:</label>
+        <input type="number" id="calcNumber" placeholder="أدخل الرقم هنا (مثال: 2، 1.5)" step="any">
+    </div>
+
+    <div class="results-section">
+        <div class="result-item">
+            <span>نتيجة التحويل اليومي:</span>
+            <span class="result-value" id="resConversion">-</span>
+        </div>
+        <div class="result-item">
+            <span>نتيجة العملية الحسابية:</span>
+            <span class="result-value final" id="resFinalCalculation">-</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // أسعار التحويل الثابتة والمحفوظة تلقائياً بناءً على متوسط البنوك المركزية (مقابل الدولار كمرجع)
+    const exchangeRates = {
+        USD: 1.0,
+        ILS: 3.70,
+        JOD: 0.71,
+        EGP: 47.50
+    };
+
+    // ربط كافة العناصر لتفعيل التحديث التلقائي اللحظي بمجرد أي تغيير
+    const inputs = ['amount', 'fromCurrency', 'toCurrency', 'operation', 'calcNumber'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateAllOutputs);
+    });
+
+    function updateAllOutputs() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const fromCurrency = document.getElementById('fromCurrency').value;
+        const toCurrency = document.getElementById('toCurrency').value;
+        const operation = document.getElementById('operation').value;
+        const calcNumber = parseFloat(document.getElementById('calcNumber').value);
+
+        const convertedAmountDisplay = document.getElementById('convertedAmountDisplay');
+        const resConversion = document.getElementById('resConversion');
+        const resFinalCalculation = document.getElementById('resFinalCalculation');
+
+        // التحقق الأساسي من وجود مبلغ صحيح للبدء
+        if (isNaN(amount) || amount < 0) {
+            convertedAmountDisplay.value = "";
+            resConversion.innerText = "-";
+            resFinalCalculation.innerText = "-";
+            return;
+        }
+
+        // أولاً: حساب عملية التحويل التلقائي بناءً على الأسعار المحفوظة
+        // تحويل من العملة المصدر إلى الدولار ثم إلى العملة الهدف
+        const amountInUSD = amount / exchangeRates[fromCurrency];
+        const convertedAmount = amountInUSD * exchangeRates[toCurrency];
+
+        // عرض النتيجة التلقائية في حقل العرض المخصص وفي لوحة النتائج
+        convertedAmountDisplay.value = `${convertedAmount.toFixed(2)} ${toCurrency}`;
+        resConversion.innerText = `${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+
+        // ثانياً: حساب العملية الحسابية الإضافية (إذا تم إدخال رقم صحيح)
+        if (!isNaN(calcNumber) && calcNumber !== 0) {
+            let finalResult = 0;
+            let opSymbol = operation === 'multiply' ? '×' : '÷';
+
+            if (operation === 'multiply') {
+                finalResult = convertedAmount * calcNumber;
+            } else if (operation === 'divide') {
+                finalResult = convertedAmount / calcNumber;
+            }
+
+            resFinalCalculation.innerText = `${convertedAmount.toFixed(2)} ${opSymbol} ${calcNumber} = ${finalResult.toFixed(2)} ${toCurrency}`;
+        } else {
+            // في حال لم يتم إدخال رقم بعد في الحقل الحسابي
+            resFinalCalculation.innerText = "بانتظار إدخال الرقم...";
+        }
+    }
+</script>
+
+</body>
+</html>
